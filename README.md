@@ -48,12 +48,12 @@ The dashboard enforces **Section 5.2: Protection Against Sexual Harassment & Off
 
 2. **Install required dependencies**
    ```bash
-   pip install streamlit pandas plotly
-   ```
-
-   Or install from a requirements file (if provided):
-   ```bash
    pip install -r requirements.txt
+   ```
+   
+   Or install packages individually:
+   ```bash
+   pip install streamlit pandas plotly
    ```
 
 ## 🚀 Usage
@@ -96,6 +96,7 @@ The dashboard uses a **Trust & Safety color palette**:
 ```
 Tinder_womens_safety/
 ├── women_safety_dashboard.py  # Main Streamlit dashboard application
+├── requirements.txt           # Python dependencies
 └── README.md                  # This file
 ```
 
