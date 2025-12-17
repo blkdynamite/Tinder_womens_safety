@@ -5,6 +5,7 @@ import plotly.graph_objects as go
 from datetime import datetime, timedelta
 import random
 import json
+import time
 
 # Page configuration
 st.set_page_config(
@@ -208,8 +209,150 @@ def identify_evasion_tactics(profiles):
     
     return tactics
 
+def show_blank_slate():
+    """Display blank slate view before audit is run"""
+    # Header
+    st.markdown(
+        f"""
+        <div style='background: linear-gradient(135deg, {DS_COLORS['slate_surface']} 0%, {DS_COLORS['zinc_bg']} 100%); 
+                    padding: 2rem; border-radius: 10px; margin-bottom: 2rem; 
+                    border-left: 4px solid {DS_COLORS['tinder_flame']};
+                    box-shadow: 0 4px 6px rgba(0,0,0,0.1);'>
+            <h1 style='color: {DS_COLORS['text_primary']}; text-align: center; margin: 0; font-size: 2rem;'>
+                🛡️ Tinder PCA: Women's Safety & Proactive Intervention
+            </h1>
+            <p style='color: {DS_COLORS['text_secondary']}; text-align: center; margin-top: 0.5rem; font-size: 1.1rem;'>
+                Detecting Sexual Abuse Intent & Off-Platform Grooming
+            </p>
+        </div>
+        """,
+        unsafe_allow_html=True
+    )
+    
+    # Idle message
+    st.markdown(
+        f"""
+        <div style='background-color: {DS_COLORS['slate_surface']}; padding: 3rem; border-radius: 10px; 
+                    text-align: center; border: 2px dashed {DS_COLORS['slate_border']}; margin-bottom: 2rem;'>
+            <h2 style='color: {DS_COLORS['text_secondary']}; margin-bottom: 1rem;'>⏸️ System Idle</h2>
+            <p style='color: {DS_COLORS['text_secondary']}; font-size: 1.1rem;'>
+                Waiting for profile batch...
+            </p>
+        </div>
+        """,
+        unsafe_allow_html=True
+    )
+    
+    # Start Audit Button
+    col1, col2, col3 = st.columns([1, 2, 1])
+    with col2:
+        if st.button("🚀 Start Policy Audit", use_container_width=True, type="primary", key="start_audit"):
+            st.session_state.running_simulation = True
+            st.rerun()
+    
+    # Sample Data Queue Section
+    st.markdown("## 📋 Sample Data Queue")
+    st.markdown("**Profiles pending analysis:**")
+    
+    queue_data = []
+    for profile in AUDIT_PROFILES:
+        queue_data.append({
+            "Profile ID": profile["profile_id"],
+            "Bio": profile["bio"],
+            "Age": profile["age"],
+            "Message Count": len(profile["messages"]),
+            "Status": "⏳ Pending"
+        })
+    
+    queue_df = pd.DataFrame(queue_data)
+    st.dataframe(queue_df, use_container_width=True, hide_index=True)
+    
+    st.info(
+        "**Note:** These profiles represent the 'safety gap' - cases where legacy models scored between 0.30-0.48 confidence. "
+        "Click 'Start Policy Audit' to run PCA analysis and reveal policy violations."
+    )
+
+def run_simulation():
+    """Run the simulation with progress indicators"""
+    # Header
+    st.markdown(
+        f"""
+        <div style='background: linear-gradient(135deg, {DS_COLORS['slate_surface']} 0%, {DS_COLORS['zinc_bg']} 100%); 
+                    padding: 2rem; border-radius: 10px; margin-bottom: 2rem; 
+                    border-left: 4px solid {DS_COLORS['tinder_flame']};
+                    box-shadow: 0 4px 6px rgba(0,0,0,0.1);'>
+            <h1 style='color: {DS_COLORS['text_primary']}; text-align: center; margin: 0; font-size: 2rem;'>
+                🛡️ Tinder PCA: Women's Safety & Proactive Intervention
+            </h1>
+            <p style='color: {DS_COLORS['text_secondary']}; text-align: center; margin-top: 0.5rem; font-size: 1.1rem;'>
+                Detecting Sexual Abuse Intent & Off-Platform Grooming
+            </p>
+        </div>
+        """,
+        unsafe_allow_html=True
+    )
+    
+    with st.status("🔌 Connecting to PCA LLM Engine...", expanded=True) as status:
+        time.sleep(1)
+        status.update(label="📥 Ingesting Safety Policies...", state="running")
+        time.sleep(1)
+        status.update(label="🔍 Analyzing Linguistic Divergence...", state="running")
+        time.sleep(1)
+        status.update(label="📊 Generating Policy Violation Reports...", state="running")
+        time.sleep(1)
+        status.update(label="✅ Audit Complete!", state="complete")
+    
+    # Set audit complete and reset simulation flag
+    st.session_state.audit_complete = True
+    st.session_state.running_simulation = False
+    
+    # Show success animation
+    st.balloons()
+    
+    # Success message
+    st.success("🎉 Policy audit completed successfully! Dashboard data loaded.")
+    
+    # Rerun to show the full dashboard
+    time.sleep(0.5)
+    st.rerun()
+
+# Initialize Session State
+def init_session_state():
+    """Initialize session state variables"""
+    if 'audit_complete' not in st.session_state:
+        st.session_state.audit_complete = False
+    if 'running_simulation' not in st.session_state:
+        st.session_state.running_simulation = False
+
 # Main Dashboard
 def main():
+    # Initialize session state
+    init_session_state()
+    
+    # Sidebar with reset functionality
+    with st.sidebar:
+        st.markdown("## 🛠️ Control Panel")
+        st.markdown("---")
+        
+        if st.session_state.audit_complete:
+            st.success("✅ Audit Complete")
+            if st.button("🔄 Reset Audit", use_container_width=True, type="secondary"):
+                st.session_state.audit_complete = False
+                st.session_state.running_simulation = False
+                st.rerun()
+        else:
+            st.info("⏸️ System Idle")
+        
+        st.markdown("---")
+        st.markdown("### System Status")
+        status_text = "🟢 Active" if st.session_state.audit_complete else "🟡 Idle"
+        st.markdown(f"**Status:** {status_text}")
+        
+        st.markdown("---")
+        st.markdown("### About")
+        st.caption("Tinder PCA: Women's Safety Dashboard")
+        st.caption("Policy-Constrained Analysis Engine")
+    
     # Apply sophisticated styling with better readability
     st.markdown(
         f"""
@@ -256,6 +399,17 @@ def main():
         unsafe_allow_html=True
     )
     
+    # Check if simulation is running
+    if st.session_state.running_simulation and not st.session_state.audit_complete:
+        run_simulation()
+        return
+    
+    # Check if audit is complete - show blank slate or full dashboard
+    if not st.session_state.audit_complete:
+        show_blank_slate()
+        return
+    
+    # Full Dashboard - Only shown after audit is complete
     # Header
     st.markdown(
         f"""
