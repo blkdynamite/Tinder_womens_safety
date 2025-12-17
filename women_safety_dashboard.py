@@ -428,53 +428,74 @@ def main():
         unsafe_allow_html=True
     )
     
-    # Strategic Impact Section - Data Science Metrics
-    st.markdown("## 🚀 Strategic Safety Impact")
+    # Incoming Audit Queue - Moved to top for Live Triage flow
+    st.markdown("## 📥 Incoming Audit Queue: High-Risk Grey Area")
+    st.caption("Profiles below are scored as 'Safe' (0.3-0.5) by production BERT models but flagged for PCA Deep-Scan.")
     
-    col1, col2, col3, col4 = st.columns(4)
+    # Build table data
+    table_data = []
+    all_analyses = []
+    for profile in AUDIT_PROFILES:
+        analysis = simulate_pca_analysis(profile)
+        all_analyses.append(analysis)
+        table_data.append({
+            "Profile ID": profile["profile_id"],
+            "Bio": profile["bio"],
+            "Legacy Confidence": f"{profile['legacy_confidence']:.1%}",
+            "PCA Confidence": f"{analysis['pca_confidence']:.1%}",
+            "Contextual Weight": f"{analysis['contextual_weight']:.2f}",
+            "Risk Category": analysis["category"],
+            "Risk Score": f"{analysis['risk_score']}/100"
+        })
     
-    # Calculate metrics
-    all_analyses = [simulate_pca_analysis(p) for p in AUDIT_PROFILES]
-    feedback_count = len([a for a in all_analyses if a["pca_confidence"] > 0.6])
-    high_risk_count = len([a for a in all_analyses if a["category"] == "Adversarial Off-Platform Pivot"])
-    model_divergence = sum([a["pca_confidence"] - p["legacy_confidence"] for a, p in zip(all_analyses, AUDIT_PROFILES)]) / len(AUDIT_PROFILES)
+    df_table = pd.DataFrame(table_data)
     
-    # False Negative Mitigation Rate: profiles that legacy missed but PCA caught
-    false_negatives_mitigated = len([(a, p) for a, p in zip(all_analyses, AUDIT_PROFILES) 
-                                     if p["legacy_confidence"] < 0.5 and a["pca_confidence"] > 0.6])
-    fn_mitigation_rate = (false_negatives_mitigated / len(AUDIT_PROFILES)) * 100
+    # Display table with column styling
+    st.dataframe(
+        df_table,
+        use_container_width=True,
+        hide_index=True,
+        column_config={
+            "Profile ID": st.column_config.TextColumn("Profile ID", width="small"),
+            "Bio": st.column_config.TextColumn("Bio", width="large"),
+            "Legacy Confidence": st.column_config.TextColumn(
+                "Legacy Confidence",
+                width="medium",
+                help="BERT-based model confidence score"
+            ),
+            "PCA Confidence": st.column_config.TextColumn(
+                "PCA Confidence",
+                width="medium",
+                help="PCA LLM confidence score"
+            ),
+            "Contextual Weight": st.column_config.TextColumn("Contextual Weight", width="small"),
+            "Risk Category": st.column_config.TextColumn("Risk Category", width="medium"),
+            "Risk Score": st.column_config.TextColumn("Risk Score", width="small")
+        }
+    )
     
-    with col1:
-        st.metric(
-            label="Incremental Recall Gain",
-            value="+18.4%",
-            delta="Detection over legacy models",
-            delta_color="normal"
-        )
-    
-    with col2:
-        st.metric(
-            label="Feedback Data Generated",
-            value=f"{feedback_count}",
-            delta="Labels ready for model re-training",
-            delta_color="normal"
-        )
-    
-    with col3:
-        st.metric(
-            label="False Negative Mitigation Rate",
-            value=f"{fn_mitigation_rate:.1f}%",
-            delta="Legacy misses → PCA catches",
-            delta_color="normal"
-        )
-    
-    with col4:
-        st.metric(
-            label="Model Divergence Delta",
-            value=f"+{model_divergence:.1%}",
-            delta="LLM understanding vs Legacy",
-            delta_color="normal"
-        )
+    # Add CSS to highlight columns - Visual mapping of the confidence gap
+    st.markdown(
+        f"""
+        <style>
+        /* Highlight Legacy Confidence column (3rd column) in grey */
+        div[data-testid="stDataFrame"] table thead th:nth-child(3),
+        div[data-testid="stDataFrame"] table tbody td:nth-child(3) {{
+            background-color: #e2e8f0 !important;
+            font-weight: 600;
+            color: #475569 !important;
+        }}
+        /* Highlight PCA Confidence column (4th column) in Tinder Flame red */
+        div[data-testid="stDataFrame"] table thead th:nth-child(4),
+        div[data-testid="stDataFrame"] table tbody td:nth-child(4) {{
+            background-color: rgba(255, 68, 88, 0.15) !important;
+            color: {DS_COLORS['tinder_flame']} !important;
+            font-weight: 700;
+        }}
+        </style>
+        """,
+        unsafe_allow_html=True
+    )
     
     st.divider()
     
@@ -617,15 +638,19 @@ def main():
     
     # Detailed Profile Analysis
     st.markdown("## 🔍 Detailed Profile Analysis")
+    st.caption("Select a profile from the queue above to view detailed PCA reasoning and analysis.")
     
+    # Get the analysis for the selected profile (use the same analyses from table generation)
     selected_profile_id = st.selectbox(
         "Select a profile to analyze:",
         options=[p["profile_id"] for p in AUDIT_PROFILES],
-        format_func=lambda x: f"{x} - {next(p['bio'] for p in AUDIT_PROFILES if p['profile_id'] == x)}"
+        format_func=lambda x: f"{x} - {next(p['bio'] for p in AUDIT_PROFILES if p['profile_id'] == x)}",
+        key="profile_selector"
     )
     
     selected_profile = next(p for p in AUDIT_PROFILES if p["profile_id"] == selected_profile_id)
-    analysis = simulate_pca_analysis(selected_profile)
+    # Use the same analysis that was generated for the table
+    analysis = next(a for a, p in zip(all_analyses, AUDIT_PROFILES) if p["profile_id"] == selected_profile_id)
     
     col1, col2 = st.columns([2, 1])
     
@@ -797,24 +822,6 @@ def main():
     
     st.divider()
     
-    # All Profiles Table
-    st.markdown("## 📋 All Safety Gap Profiles")
-    
-    table_data = []
-    for profile in AUDIT_PROFILES:
-        analysis = simulate_pca_analysis(profile)
-        table_data.append({
-            "Profile ID": profile["profile_id"],
-            "Bio": profile["bio"],
-            "Legacy Confidence": f"{profile['legacy_confidence']:.1%}",
-            "PCA Confidence": f"{analysis['pca_confidence']:.1%}",
-            "Contextual Weight": f"{analysis['contextual_weight']:.2f}",
-            "Risk Category": analysis["category"],
-            "Risk Score": f"{analysis['risk_score']}/100"
-        })
-    
-    df_table = pd.DataFrame(table_data)
-    st.dataframe(df_table, use_container_width=True, hide_index=True)
     
     # The Flywheel Narrative
     st.divider()
