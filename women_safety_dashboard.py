@@ -14,19 +14,21 @@ st.set_page_config(
     initial_sidebar_state="expanded"
 )
 
-# Data Science & Engineering Color Palette - Dark Mode with Slate/Zinc
+# Data Science & Engineering Color Palette - Sophisticated Slate with Tinder Accents
 DS_COLORS = {
-    'slate_bg': '#1e293b',  # Slate-800
-    'zinc_bg': '#27272a',  # Zinc-800
-    'slate_surface': '#334155',  # Slate-700
+    'slate_bg': '#f8fafc',  # Slate-50 - Light background for readability
+    'zinc_bg': '#f1f5f9',  # Slate-100
+    'slate_surface': '#ffffff',  # White for cards/surfaces
+    'slate_border': '#e2e8f0',  # Slate-200 for borders
     'tinder_flame': '#FF4458',  # Tinder Red/Flame
     'tinder_flame_light': '#FF6B9D',  # Light Tinder accent
     'accent_purple': '#8b5cf6',  # Purple accent
-    'text_primary': '#f1f5f9',  # Slate-100
-    'text_secondary': '#cbd5e1',  # Slate-300
+    'text_primary': '#0f172a',  # Slate-900 - Dark text for readability
+    'text_secondary': '#475569',  # Slate-600
+    'text_muted': '#64748b',  # Slate-500
     'success': '#10b981',  # Green
     'warning': '#f59e0b',  # Amber
-    'border': '#475569'  # Slate-600
+    'border': '#cbd5e1'  # Slate-300
 }
 
 # Policy Text - Section 5.2: Protection Against Sexual Harassment & Off-Platform Grooming
@@ -208,7 +210,7 @@ def identify_evasion_tactics(profiles):
 
 # Main Dashboard
 def main():
-    # Apply dark mode styling
+    # Apply sophisticated styling with better readability
     st.markdown(
         f"""
         <style>
@@ -218,27 +220,36 @@ def main():
         .main .block-container {{
             background-color: {DS_COLORS['slate_bg']};
             padding-top: 2rem;
+            max-width: 95%;
         }}
         h1, h2, h3, h4, h5, h6 {{
             color: {DS_COLORS['text_primary']};
+            font-weight: 600;
         }}
-        p, li, span {{
-            color: {DS_COLORS['text_secondary']};
+        p, li, span, div {{
+            color: {DS_COLORS['text_primary']};
         }}
         .stMetric {{
             background-color: {DS_COLORS['slate_surface']};
             padding: 1rem;
             border-radius: 8px;
-            border: 1px solid {DS_COLORS['border']};
+            border: 1px solid {DS_COLORS['slate_border']};
+            box-shadow: 0 1px 3px rgba(0,0,0,0.1);
         }}
         .stMetric label {{
             color: {DS_COLORS['text_secondary']};
+            font-weight: 500;
         }}
         .stMetric [data-testid="stMetricValue"] {{
             color: {DS_COLORS['text_primary']};
+            font-weight: 700;
         }}
         .stDataFrame {{
             background-color: {DS_COLORS['slate_surface']};
+        }}
+        .stSelectbox label, .stTextInput label {{
+            color: {DS_COLORS['text_primary']};
+            font-weight: 500;
         }}
         </style>
         """,
@@ -248,13 +259,14 @@ def main():
     # Header
     st.markdown(
         f"""
-        <div style='background: linear-gradient(90deg, {DS_COLORS['slate_surface']}, {DS_COLORS['zinc_bg']}); 
+        <div style='background: linear-gradient(135deg, {DS_COLORS['slate_surface']} 0%, {DS_COLORS['zinc_bg']} 100%); 
                     padding: 2rem; border-radius: 10px; margin-bottom: 2rem; 
-                    border: 2px solid {DS_COLORS['tinder_flame']};'>
-            <h1 style='color: {DS_COLORS['text_primary']}; text-align: center; margin: 0;'>
+                    border-left: 4px solid {DS_COLORS['tinder_flame']};
+                    box-shadow: 0 4px 6px rgba(0,0,0,0.1);'>
+            <h1 style='color: {DS_COLORS['text_primary']}; text-align: center; margin: 0; font-size: 2rem;'>
                 🛡️ Tinder PCA: Women's Safety & Proactive Intervention
             </h1>
-            <p style='color: {DS_COLORS['text_secondary']}; text-align: center; margin-top: 0.5rem;'>
+            <p style='color: {DS_COLORS['text_secondary']}; text-align: center; margin-top: 0.5rem; font-size: 1.1rem;'>
                 Detecting Sexual Abuse Intent & Off-Platform Grooming
             </p>
         </div>
@@ -328,19 +340,31 @@ def main():
         x="Tactic",
         y="Count",
         color="Count",
-        color_continuous_scale=[DS_COLORS['slate_surface'], DS_COLORS['tinder_flame']],
+        color_continuous_scale=['#e2e8f0', DS_COLORS['tinder_flame']],
         title="Evasion Tactics Detected in Safety Gap Profiles",
         labels={"Count": "Number of Profiles", "Tactic": "Evasion Tactic"}
     )
     fig_tactics.update_layout(
-        plot_bgcolor=DS_COLORS['slate_surface'],
-        paper_bgcolor=DS_COLORS['slate_bg'],
-        font=dict(size=12, color=DS_COLORS['text_primary']),
-        height=400,
-        xaxis=dict(gridcolor=DS_COLORS['border']),
-        yaxis=dict(gridcolor=DS_COLORS['border'])
+        plot_bgcolor='white',
+        paper_bgcolor='white',
+        font=dict(size=13, color=DS_COLORS['text_primary']),
+        height=450,
+        autosize=True,
+        margin=dict(l=50, r=50, t=60, b=100),
+        xaxis=dict(
+            gridcolor=DS_COLORS['slate_border'],
+            tickangle=-45,
+            title_font=dict(size=13),
+            tickfont=dict(size=11)
+        ),
+        yaxis=dict(
+            gridcolor=DS_COLORS['slate_border'],
+            title_font=dict(size=13),
+            tickfont=dict(size=11)
+        ),
+        title_font=dict(size=16, color=DS_COLORS['text_primary'])
     )
-    st.plotly_chart(fig_tactics, use_container_width=True)
+    st.plotly_chart(fig_tactics, use_container_width=True, config={'displayModeBar': True, 'responsive': True})
     
     # Risk Category Distribution
     st.markdown("## 🎯 Risk Category Distribution")
@@ -361,12 +385,22 @@ def main():
             title="Distribution of Risk Categories"
         )
         fig_pie.update_layout(
-            height=400,
-            plot_bgcolor=DS_COLORS['slate_surface'],
-            paper_bgcolor=DS_COLORS['slate_bg'],
-            font=dict(color=DS_COLORS['text_primary'])
+            height=450,
+            autosize=True,
+            plot_bgcolor='white',
+            paper_bgcolor='white',
+            font=dict(size=12, color=DS_COLORS['text_primary']),
+            title_font=dict(size=15, color=DS_COLORS['text_primary']),
+            margin=dict(l=20, r=20, t=60, b=20),
+            legend=dict(
+                font=dict(size=11, color=DS_COLORS['text_primary']),
+                bgcolor='white',
+                bordercolor=DS_COLORS['slate_border'],
+                borderwidth=1
+            )
         )
-        st.plotly_chart(fig_pie, use_container_width=True)
+        fig_pie.update_traces(textfont=dict(size=12, color=DS_COLORS['text_primary']))
+        st.plotly_chart(fig_pie, use_container_width=True, config={'displayModeBar': True, 'responsive': True})
     
     with col2:
         # Confidence Comparison
@@ -385,27 +419,47 @@ def main():
             y=comparison_df["Legacy Confidence"],
             mode='lines+markers',
             name='Legacy Model (BERT-based)',
-            line=dict(color=DS_COLORS['accent_purple'], width=2, dash='dash')
+            line=dict(color=DS_COLORS['accent_purple'], width=3, dash='dash'),
+            marker=dict(size=8)
         ))
         fig_comparison.add_trace(go.Scatter(
             x=comparison_df["Profile"],
             y=comparison_df["PCA Confidence"],
             mode='lines+markers',
             name='PCA Model (Ground Truth)',
-            line=dict(color=DS_COLORS['tinder_flame'], width=2)
+            line=dict(color=DS_COLORS['tinder_flame'], width=3),
+            marker=dict(size=8)
         ))
         fig_comparison.update_layout(
             title="Signal Divergence: Legacy vs. PCA Ground Truth",
             xaxis_title="Profile ID",
             yaxis_title="Confidence Score",
-            height=400,
-            plot_bgcolor=DS_COLORS['slate_surface'],
-            paper_bgcolor=DS_COLORS['slate_bg'],
-            font=dict(color=DS_COLORS['text_primary']),
-            xaxis=dict(gridcolor=DS_COLORS['border']),
-            yaxis=dict(gridcolor=DS_COLORS['border'])
+            height=450,
+            autosize=True,
+            plot_bgcolor='white',
+            paper_bgcolor='white',
+            font=dict(size=12, color=DS_COLORS['text_primary']),
+            title_font=dict(size=15, color=DS_COLORS['text_primary']),
+            margin=dict(l=50, r=30, t=60, b=50),
+            xaxis=dict(
+                gridcolor=DS_COLORS['slate_border'],
+                title_font=dict(size=13),
+                tickfont=dict(size=11),
+                tickangle=-45
+            ),
+            yaxis=dict(
+                gridcolor=DS_COLORS['slate_border'],
+                title_font=dict(size=13),
+                tickfont=dict(size=11)
+            ),
+            legend=dict(
+                font=dict(size=11, color=DS_COLORS['text_primary']),
+                bgcolor='white',
+                bordercolor=DS_COLORS['slate_border'],
+                borderwidth=1
+            )
         )
-        st.plotly_chart(fig_comparison, use_container_width=True)
+        st.plotly_chart(fig_comparison, use_container_width=True, config={'displayModeBar': True, 'responsive': True})
     
     # Detailed Profile Analysis
     st.markdown("## 🔍 Detailed Profile Analysis")
@@ -487,20 +541,34 @@ def main():
         yaxis_title="Detection Delay (Days)",
         barmode='group',
         height=500,
-        plot_bgcolor=DS_COLORS['slate_surface'],
-        paper_bgcolor=DS_COLORS['slate_bg'],
-        font=dict(color=DS_COLORS['text_primary']),
-        xaxis=dict(gridcolor=DS_COLORS['border'], tickangle=-45),
-        yaxis=dict(gridcolor=DS_COLORS['border']),
+        autosize=True,
+        plot_bgcolor='white',
+        paper_bgcolor='white',
+        font=dict(size=12, color=DS_COLORS['text_primary']),
+        title_font=dict(size=16, color=DS_COLORS['text_primary']),
+        margin=dict(l=50, r=30, t=60, b=120),
+        xaxis=dict(
+            gridcolor=DS_COLORS['slate_border'],
+            tickangle=-45,
+            title_font=dict(size=13),
+            tickfont=dict(size=11)
+        ),
+        yaxis=dict(
+            gridcolor=DS_COLORS['slate_border'],
+            title_font=dict(size=13),
+            tickfont=dict(size=11)
+        ),
         legend=dict(
             x=0.7,
-            y=1,
-            bgcolor=DS_COLORS['slate_surface'],
-            bordercolor=DS_COLORS['border']
+            y=1.02,
+            bgcolor='white',
+            bordercolor=DS_COLORS['slate_border'],
+            borderwidth=1,
+            font=dict(size=11, color=DS_COLORS['text_primary'])
         )
     )
-    
-    st.plotly_chart(fig_timeline, use_container_width=True)
+    fig_timeline.update_traces(textfont=dict(size=10, color=DS_COLORS['text_primary']))
+    st.plotly_chart(fig_timeline, use_container_width=True, config={'displayModeBar': True, 'responsive': True})
     
     st.info(
         f"**Impact:** PCA reduces model update latency from an average of **14 days** (legacy BERT-based models) to **3 hours** (PCA with automated feedback loop). "
